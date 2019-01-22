@@ -9,11 +9,10 @@ let myBlockChain = new BlockChain.Blockchain();
 
  let i= 0;
  let interval= setInterval(async ()=>  {
-  console.log("Hellow");
-  await myBlockChain.addBlock(new Block.Block("First"));
-  await myBlockChain.getBlockHeight()
-  i++;
-  if(i<=2)
+	i++;
+  await myBlockChain.addBlock(new Block.Block("Block #"+i));
+
+  if(i>=10)
     clearInterval(interval);
  }, 1000)
 

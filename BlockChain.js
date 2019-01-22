@@ -17,36 +17,53 @@ class Blockchain {
     // You have to options, because the method will always execute when you create your blockchain
     // you will need to set this up statically or instead you can verify if the height !== 0 then you
     // will not create the genesis block
-    generateGenesisBlock(){
+    async generateGenesisBlock(){
         // Add your code here
+        let blockHeight = await this.getBlockHeight();
+        if(blockHeight<=0){
+            let genesisBlock = new Block.Block("This is Genesis Block");
+            console.log ("Creating Genesis Block");
+            await this.addBlock(genesisBlock);
+        }else {
+            console.log("Genesis Block is Already created -- > Not Creating another Genesis");
+        }
     }
 
     // Get block height, it is a helper method that return the height of the blockchain
     async getBlockHeight() {
         // Add your code here
-        console.log("Returning block height");
         let blockHeight = await this.db.getBlocksCount();
+        console.log("NOW RETURNING  block height "+ blockHeight);
         return blockHeight;
-
     }
 
     // Add new block
-    addBlock(newBlock) {
-        this.getBlockHeight().then((newHeight) => newBlock.height = newHeight);
+    async addBlock(newBlock) {
+        newBlock.height = await this.getBlockHeight();
+        console.log("New Blocks height "+newBlock.height);
         // UTC timestamp
         newBlock.time = new Date().getTime().toString().slice(0,-3);
         // previous block hash
         if(newBlock.height>0){
-        newBlock.previousBlockHash = this.getBlock(this.getBlockHeight()-1).hash;
+
+            let previousBlockJson = await this.getBlock(newBlock.height-1);
+            let previousBlock = JSON.parse(previousBlockJson);
+            console.log("Previous Block = "+ previousBlock)
+            newBlock.previousBlockHash = previousBlock.hash;
         }
         // Block hash with SHA256 using newBlock and converting to a string
         newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-        this.db.addDataToLevelDB(newBlock)
+        console.log("Adding block # "+ newBlock.height);
+
+        await this.db.addDataToLevelDB(JSON.stringify(newBlock));
+        console.log("Saved Block to DB" + JSON.stringify(newBlock));
     }
 
     // Get Block By Height
-    getBlock(height) {
-        this.db.getLevelDBData(height)
+    async getBlock(height) {
+        let block = await this.db.getLevelDBData(height);
+        console.log("Retrieved block "+height +" = "+block);
+        return block;
     }
 
     // Validate if Block is being tampered by Block Height

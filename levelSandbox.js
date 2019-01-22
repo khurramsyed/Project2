@@ -7,35 +7,36 @@ class LevelSandbox {
     }
 
     // Get data from levelDB with key (Promise)
-     getLevelDBData(key){
+    getLevelDBData(key){
         let self = this;
-        return new Promise(function(resolve, reject) {
-            // Add your code here, remember in Promises you need to resolve() or reject()
-        });
+        //return new Promise(function(resolve, reject) {
+            return  self.db.get(key)/*, function(err, value) {
+                if (err) return console.log('Not found!', err);
+                console.log('Value = ' + value);
+                resolve( value);
+              });
+        });*/
     }
 
     // Add data to levelDB with key and value (Promise)
     addLevelDBData(key, value) {
         let self = this;
-        return new Promise(function(resolve, reject) {
+        //return new Promise(function(resolve, reject) {
             // Add your code here, remember in Promises you need to resolve() or reject() 
-            self.db.put(key, value, function(err) {
-                if (err) return console.log('Block ' + key + ' submission failed', err);
-                });
-            resolve;
-        });
+            self.db.put(key, value);
+        //});
     }
 
-     addDataToLevelDB(value) {
+      addDataToLevelDB(value) {
         let i = 0;
         let self = this;
-        self.db.createReadStream().on('data', function(data) {
+        self.db.createReadStream().on('data', async function(data) {
               i++;
             }).on('error', function(err) {
                 return console.log('Unable to read data stream!', err)
             }).on('close', function() {
               console.log('Block #' + i);
-              self.addLevelDBData(i, value);
+             self.addLevelDBData(i, value);
             });
     }
 
@@ -47,11 +48,27 @@ class LevelSandbox {
             self.db.createReadStream().on('data', function(data) {
                 i++;
                 }).on('error', function(err) {
-                    return console.log('Unable to read data stream!', err)
+                    reject(err)
+                    console.log('Unable to read data stream!', err)
                 }).on('close', function() {
-                console.log('Counter #' + i);
-                return i;
+                  console.log('Counter #' + i);
+                  resolve(i);
                 });
+            return i;
+        });
+    }  
+
+      // Method that return the height
+      getBlock(x) {
+        let self = this;
+        return new Promise(function(resolve, reject){
+            let i = 0;
+            self.db.createReadStream().on('data', function(data) {
+                i++;
+                if(i===x){
+                    resolve(data.value);
+                }
+             });
         });
     }  
 
