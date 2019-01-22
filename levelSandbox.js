@@ -9,13 +9,18 @@ class LevelSandbox {
     // Get data from levelDB with key (Promise)
     getLevelDBData(key){
         let self = this;
-        //return new Promise(function(resolve, reject) {
-            return  self.db.get(key)/*, function(err, value) {
-                if (err) return console.log('Not found!', err);
-                console.log('Value = ' + value);
-                resolve( value);
+        let block = undefined;
+        return new Promise(function(resolve, reject) {
+            return  self.db.get(key, function(err, value) {
+                if (err) {
+                    console.log('Not found!', err);
+                    reject(err);
+                }
+                block = value;
+                console.log('Value = ' + block);
+                resolve(block);
               });
-        });*/
+        });
     }
 
     // Add data to levelDB with key and value (Promise)

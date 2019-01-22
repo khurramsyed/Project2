@@ -47,8 +47,8 @@ class Blockchain {
         if(newBlock.height>0){
 
             let previousBlockJson = await this.getBlock(newBlock.height-1);
+            console.log("PREVIOUS BLOCK JSON "+ previousBlockJson);
             let previousBlock = JSON.parse(previousBlockJson);
-            console.log("Previous Block = "+ previousBlock)
             newBlock.previousBlockHash = previousBlock.hash;
         }
         // Block hash with SHA256 using newBlock and converting to a string
@@ -62,7 +62,6 @@ class Blockchain {
     // Get Block By Height
     async getBlock(height) {
         let block = await this.db.getLevelDBData(height);
-        console.log("Retrieved block "+height +" = "+block);
         return block;
     }
 
