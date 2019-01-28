@@ -33,30 +33,26 @@ class Blockchain {
     async getBlockHeight() {
         // Add your code here
         let blockHeight = await this.db.getBlocksCount();
-        console.log("NOW RETURNING  block height "+ blockHeight);
         return blockHeight;
     }
 
     // Add new block
     async addBlock(newBlock) {
         newBlock.height = await this.getBlockHeight();
-        console.log("New Blocks height "+newBlock.height);
         // UTC timestamp
         newBlock.time = new Date().getTime().toString().slice(0,-3);
         // previous block hash
         if(newBlock.height>0){
 
             let previousBlockJson = await this.getBlock(newBlock.height-1);
-            console.log("PREVIOUS BLOCK JSON "+ previousBlockJson);
             let previousBlock = JSON.parse(previousBlockJson);
             newBlock.previousBlockHash = previousBlock.hash;
         }
         // Block hash with SHA256 using newBlock and converting to a string
         newBlock.hash = SHA256(JSON.stringify(newBlock)).toString();
-        console.log("Adding block # "+ newBlock.height);
+        console.log("ADDING BLOCK = "+ JSON.stringify(newBlock));
 
         await this.db.addDataToLevelDB(JSON.stringify(newBlock));
-        console.log("Saved Block to DB" + JSON.stringify(newBlock));
     }
 
     // Get Block By Height
@@ -65,14 +61,44 @@ class Blockchain {
         return block;
     }
 
+
     // Validate if Block is being tampered by Block Height
-    validateBlock(height) {
-        // Add your code here
+    async validateBlock(height) {
+         
+            // Add your code here   
+            try {
+            let retreivedBlockJson =  await this.getBlock(height);
+            let retreivedBlock = JSON.parse(retreivedBlockJson);
+            let retrievedBlockHash = retreivedBlock.hash;
+            retreivedBlock.hash = "";
+            let recalculatedHash = SHA256(JSON.stringify(retreivedBlock)).toString();
+            if(retrievedBlockHash === recalculatedHash){
+                return true;
+            }else{
+                return false;
+            }
+            } catch (error) {
+                console.log("Error "+ error);
+            }
     }
 
     // Validate Blockchain
-    validateChain() {
-        // Add your code here
+    async validateChain() {
+        let self = this;
+        let errors = [] ;
+        let blockHeight = await self.getBlockHeight();
+        let i = 0;
+        try{
+            for(i=0; i< blockHeight ; i++) {              
+                let blockValidationResult = await self.validateBlock(i);
+                if(blockValidationResult == false){
+                    errors.push("Invalid Block "+i);
+                }
+            }
+            return errors;
+        }catch(err){
+            console.log(err);
+        }
     }
 
     // Utility Method to Tamper a Block for Test Validation
@@ -80,7 +106,9 @@ class Blockchain {
     _modifyBlock(height, block) {
         let self = this;
         return new Promise( (resolve, reject) => {
-            self.bd.addLevelDBData(height, JSON.stringify(block).toString()).then((blockModified) => {
+            console.log("Modifying Block @"+height)
+            self.db.addLevelDBData(height, JSON.stringify(block).toString()).then((blockModified) => {
+                console.log("blockModified = "+ blockModified);
                 resolve(blockModified);
             }).catch((err) => { console.log(err); reject(err)});
         });

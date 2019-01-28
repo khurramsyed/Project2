@@ -8,10 +8,9 @@ let myBlockChain = new BlockChain.Blockchain();
  ******************************************/
 
  let i= 0;
- let interval= setInterval(async ()=>  {
+ let interval= setInterval( ()=>  {
 	i++;
-  await myBlockChain.addBlock(new Block.Block("Block #"+i));
-
+	myBlockChain.addBlock(new Block.Block("Block #"+i));
   if(i>=10)
     clearInterval(interval);
  }, 1000)
@@ -20,12 +19,15 @@ let myBlockChain = new BlockChain.Blockchain();
  ** Function to get the Height of the Chain ****
  ***********************************************/
 
-/*
+
 // Be careful this only will work if `getBlockHeight` method in Blockchain.js file return a Promise
 myBlockChain.getBlockHeight().then((height) => {
 	console.log(height);
 }).catch((err) => { console.log(err);});
-*/
+
+
+// prints a promise and then result
+
 
 /***********************************************
  ******** Function to Get a Block  *************
@@ -36,26 +38,26 @@ myBlockChain.getBlockHeight().then((height) => {
 myBlockChain.getBlock(0).then((block) => {
 	console.log(JSON.stringify(block));
 }).catch((err) => { console.log(err);});
+
+// prints a promise and then result
+
 *?
 /***********************************************
  ***************** Validate Block  *************
  ***********************************************/
 
-/*
+
 // Be careful this only will work if `validateBlock` method in Blockchain.js file return a Promise
 myBlockChain.validateBlock(0).then((valid) => {
 	console.log(valid);
 })
-.catch((error) => {
-	console.log(error);
-})
-*/
 
 /** Tampering a Block this is only for the purpose of testing the validation methods */
 /*
 myBlockChain.getBlock(5).then((block) => {
-	let blockAux = block;
+	let blockAux = JSON.parse(block);
 	blockAux.body = "Tampered Block";
+	console.log("Aux Height ="+blockAux.height)
 	myBlockChain._modifyBlock(blockAux.height, blockAux).then((blockModified) => {
 		if(blockModified){
 			myBlockChain.validateBlock(blockAux.height).then((valid) => {
@@ -70,7 +72,7 @@ myBlockChain.getBlock(5).then((block) => {
 	}).catch((err) => { console.log(err);});
 }).catch((err) => { console.log(err);});
 myBlockChain.getBlock(6).then((block) => {
-	let blockAux = block;
+	let blockAux =  JSON.parse(block);
 	blockAux.previousBlockHash = "jndininuud94j9i3j49dij9ijij39idj9oi";
 	myBlockChain._modifyBlock(blockAux.height, blockAux).then((blockModified) => {
 		if(blockModified){
@@ -84,19 +86,21 @@ myBlockChain.getBlock(6).then((block) => {
  ***************** Validate Chain  *************
  ***********************************************/
 
-/*
+
 // Be careful this only will work if `validateChain` method in Blockchain.js file return a Promise
-myBlockChain.validateChain().then((errorLog) => {
-	if(errorLog.length > 0){
+myBlockChain.validateChain().then((errors) => {
+	console.log("Errors Are "+errors);
+	if(errors.length>0){
 		console.log("The chain is not valid:");
-		errorLog.forEach(error => {
+		errors.forEach(error => {
 			console.log(error);
 		});
 	} else {
 		console.log("No errors found, The chain is Valid!");
 	}
-})
-.catch((error) => {
+}).catch((error) => {
 	console.log(error);
 })
-*/
+
+
+
