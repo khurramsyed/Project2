@@ -103,4 +103,10 @@ myBlockChain.validateChain().then((errors) => {
 })
 
 
+// Get Next Block Previous hash
+let calcPreviousHash = async () => {
+	let prevHash = await myBlockChain.getNextBlocksPreviousBlockHash(0);
+	return prevHash;
+}
 
+calcPreviousHash().then((value) => console.log(value))

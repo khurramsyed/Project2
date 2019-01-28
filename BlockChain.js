@@ -87,17 +87,40 @@ class Blockchain {
         let self = this;
         let errors = [] ;
         let blockHeight = await self.getBlockHeight();
+        let maxBlocks = await self.getBlockHeight();
         let i = 0;
         try{
             for(i=0; i< blockHeight ; i++) {              
                 let blockValidationResult = await self.validateBlock(i);
-                if(blockValidationResult == false){
+                let currentBlockJson = await self.getBlock(i);
+                let currentBlock = JSON.parse(currentBlockJson);
+                let nextBlocksPreviousHash = await self.getNextBlocksPreviousBlockHash(i);
+                console.log("this.getNextBlocksPreviousHash " + nextBlocksPreviousHash +"currentBlock.hash ="+ currentBlock.hash);
+                if(blockValidationResult == false ){
                     errors.push("Invalid Block "+i);
+                }
+                if( i >= maxBlocks && nextBlocksPreviousHash != currentBlock.hash){
+                    errors.push("Invalid Block "+i +"previous block hash does'nt match");
                 }
             }
             return errors;
         }catch(err){
             console.log(err);
+        }
+    }
+
+    async getNextBlocksPreviousBlockHash(height){
+        let self = this;
+        let maxBlocks = await self.getBlockHeight();
+        let nextBlockHeight =height+1;
+        if(nextBlockHeight < maxBlocks && nextBlockHeight >=1){
+            let nextBlockJson = await self.getBlock(nextBlockHeight)
+            console.log("Next Block Json " +nextBlockJson)
+            let nextBlock = JSON.parse(nextBlockJson);
+            
+            return nextBlock.previousBlockHash;
+        }else{
+            return "Non Existent Block";
         }
     }
 
