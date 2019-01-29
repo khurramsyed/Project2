@@ -1,3 +1,5 @@
+// Most of this code is test code provided by Udacity git repo
+
 const BlockChain = require('./BlockChain.js');
 const Block = require('./Block.js');
 

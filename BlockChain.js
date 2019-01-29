@@ -19,7 +19,7 @@ class Blockchain {
     // will not create the genesis block
     async generateGenesisBlock(){
         // Add your code here
-        let blockHeight = await this.getBlockHeight();
+        let blockHeight = await this.getNextBlockHeight();
         if(blockHeight<=0){
             let genesisBlock = new Block.Block("This is Genesis Block");
             console.log ("Creating Genesis Block");
@@ -30,15 +30,21 @@ class Blockchain {
     }
 
     // Get block height, it is a helper method that return the height of the blockchain
-    async getBlockHeight() {
+    async getNextBlockHeight() {
         // Add your code here
         let blockHeight = await this.db.getBlocksCount();
         return blockHeight;
     }
 
+    async getBlockHeight() {
+        // Add your code here
+        let blockHeight = await this.db.getBlocksCount();
+        return blockHeight -1;
+    }
+
     // Add new block
     async addBlock(newBlock) {
-        newBlock.height = await this.getBlockHeight();
+        newBlock.height = await this.getNextBlockHeight();
         // UTC timestamp
         newBlock.time = new Date().getTime().toString().slice(0,-3);
         // previous block hash
@@ -86,8 +92,8 @@ class Blockchain {
     async validateChain() {
         let self = this;
         let errors = [] ;
-        let blockHeight = await self.getBlockHeight();
-        let maxBlocks = await self.getBlockHeight();
+        let blockHeight = await self.getNextBlockHeight();
+        let maxBlocks = await self.getNextBlockHeight();
         let i = 0;
         try{
             for(i=0; i< blockHeight ; i++) {              
@@ -111,7 +117,7 @@ class Blockchain {
 
     async getNextBlocksPreviousBlockHash(height){
         let self = this;
-        let maxBlocks = await self.getBlockHeight();
+        let maxBlocks = await self.getNextBlockHeight();
         let nextBlockHeight =height+1;
         if(nextBlockHeight < maxBlocks && nextBlockHeight >=1){
             let nextBlockJson = await self.getBlock(nextBlockHeight)
